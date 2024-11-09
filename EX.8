@@ -1,0 +1,266 @@
+1.#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define TABLE_SIZE 100
+
+// Structure for a username entry in the hash table
+typedef struct {
+    char username[100];
+    int is_occupied; // Flag to check if the slot is occupied
+} HashEntry;
+
+// Hash function to map a username to an index
+unsigned int hash(char* str) {
+    unsigned int hash_val = 0;
+    while (*str) {
+        hash_val = (hash_val * 31) + (*str++);
+    }
+    return hash_val % TABLE_SIZE;
+}
+
+// Function to check if a username exists in the hash table
+int search_username(HashEntry* table, char* username) {
+    unsigned int index = hash(username);
+    if (table[index].is_occupied && strcmp(table[index].username, username) == 0) {
+        return index; // Username found
+    }
+    return -1; // Username not found
+}
+
+int main() {
+    HashEntry* table = (HashEntry*)malloc(TABLE_SIZE * sizeof(HashEntry));
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        table[i].is_occupied = 0; // Initialize all slots as empty
+    }
+
+    char username[100];
+    printf("Enter a username to check: ");
+    fgets(username, 100, stdin);
+    username[strcspn(username, "\n")] = '\0'; // Remove newline character
+
+    if (search_username(table, username) != -1) {
+        printf("Username already exists!\n");
+    } else {
+        printf("Username is available.\n");
+    }
+
+    free(table);
+    return 0;
+}
+OUTPUT
+Enter a username to check: Alice
+Username is available.
+
+
+2.#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define TABLE_SIZE 100
+
+// Structure for storing product information
+typedef struct {
+    int productID;
+    char name[100];
+    float price;
+    int is_occupied;  // Flag to check if the slot is occupied
+} Product;
+
+// Hash function to map product ID to an index
+unsigned int hash(int productID) {
+    return productID % TABLE_SIZE;
+}
+
+// Function to insert a product into the hash table
+void insert_product(Product* table, int productID, const char* name, float price) {
+    unsigned int index = hash(productID);
+
+    // Linear probing to handle collisions
+    while (table[index].is_occupied) {
+        index = (index + 1) % TABLE_SIZE;
+    }
+
+    table[index].productID = productID;
+    strcpy(table[index].name, name);
+    table[index].price = price;
+    table[index].is_occupied = 1;
+}
+
+// Function to search for a product by ID
+Product* search_product(Product* table, int productID) {
+    unsigned int index = hash(productID);
+
+    // Linear probing to find the product
+    while (table[index].is_occupied) {
+        if (table[index].productID == productID) {
+            return &table[index];
+        }
+        index = (index + 1) % TABLE_SIZE;
+    }
+    return NULL;  // Product not found
+}
+
+int main() {
+    int n;
+
+    // Get the number of products
+    printf("Enter the number of products: ");
+    scanf("%d", &n);
+
+    // Dynamically allocate memory for the hash table
+    Product* table = (Product*)malloc(TABLE_SIZE * sizeof(Product));
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        table[i].is_occupied = 0; // Initialize the table
+    }
+
+    // Insert products into the hash table
+    for (int i = 0; i < n; i++) {
+        int productID;
+        char name[100];
+        float price;
+
+        printf("Enter product ID: ");
+        scanf("%d", &productID);
+        getchar();  // Consume newline character
+        printf("Enter product name: ");
+        fgets(name, sizeof(name), stdin);
+        name[strcspn(name, "\n")] = '\0'; // Remove newline
+        printf("Enter product price: ");
+        scanf("%f", &price);
+
+        insert_product(table, productID, name, price);
+    }
+
+    // Search for a product by ID
+    int targetID;
+    printf("Enter product ID to search: ");
+    scanf("%d", &targetID);
+
+    Product* product = search_product(table, targetID);
+    if (product != NULL) {
+        printf("Product found: ID: %d, Name: %s, Price: %.2f\n", product->productID, product->name, product->price);
+    } else {
+        printf("Product with ID %d not found.\n", targetID);
+    }
+
+    // Free dynamically allocated memory
+    free(table);
+    return 0;
+}
+OUTPUT
+Enter the number of products: 2
+Enter product ID: 101
+Enter product name: Laptop
+Enter product price: 800.50
+Enter product ID: 102
+Enter product name: Smartphone
+Enter product price: 500.75
+Enter product ID to search: 101
+Product found: ID: 101, Name: Laptop, Price: 800.50
+
+
+3.#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define TABLE_SIZE 100
+
+// Structure for storing article information
+typedef struct {
+    char title[100];
+    char content[500];
+    int is_occupied;  // Flag to check if the slot is occupied
+} Article;
+
+// Hash function to map article title to an index
+unsigned int hash(char* title) {
+    unsigned int hash_val = 0;
+    while (*title) {
+        hash_val = (hash_val * 31) + (*title++);
+    }
+    return hash_val % TABLE_SIZE;
+}
+
+// Function to insert an article into the hash table
+void insert_article(Article* table, const char* title, const char* content) {
+    unsigned int index = hash(title);
+
+    // Linear probing to handle collisions
+    while (table[index].is_occupied) {
+        index = (index + 1) % TABLE_SIZE;
+    }
+
+    strcpy(table[index].title, title);
+    strcpy(table[index].content, content);
+    table[index].is_occupied = 1;
+}
+
+// Function to search for an article by title
+Article* search_article(Article* table, const char* title) {
+    unsigned int index = hash(title);
+
+    // Linear probing to find the article
+    while (table[index].is_occupied) {
+        if (strcmp(table[index].title, title) == 0) {
+            return &table[index];
+        }
+        index = (index + 1) % TABLE_SIZE;
+    }
+    return NULL;  // Article not found
+}
+
+int main() {
+    int n;
+
+    // Get the number of articles
+    printf("Enter the number of articles: ");
+    scanf("%d", &n);
+    getchar(); // Consume newline character
+
+    // Dynamically allocate memory for the hash table
+    Article* table = (Article*)malloc(TABLE_SIZE * sizeof(Article));
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        table[i].is_occupied = 0; // Initialize the table
+    }
+
+    // Insert articles into the hash table
+    for (int i = 0; i < n; i++) {
+        char title[100];
+        char content[500];
+
+        printf("Enter article title: ");
+        fgets(title, sizeof(title), stdin);
+        title[strcspn(title, "\n")] = '\0';  // Remove newline character
+        printf("Enter article content: ");
+        fgets(content, sizeof(content), stdin);
+        content[strcspn(content, "\n")] = '\0';  // Remove newline character
+
+        insert_article(table, title, content);
+    }
+
+    // Search for an article by title
+    char target_title[100];
+    printf("Enter article title to search for: ");
+    fgets(target_title, sizeof(target_title), stdin);
+    target_title[strcspn(target_title, "\n")] = '\0';  // Remove newline character
+
+    Article* article = search_article(table, target_title);
+    if (article != NULL) {
+        printf("Article found: Title: %s\nContent: %s\n", article->title, article->content);
+    } else {
+        printf("Article with title '%s' not found.\n", target_title);
+    }
+
+    // Free dynamically allocated memory
+    free(table);
+    return 0;
+}
+OUTPUT
+Enter the number of articles: 2
+Enter article title: C Programming Basics
+Enter article content: This article covers the basics of C programming.
+Enter article title: Advanced C Concepts
+Enter article content: This article dives deep into advanced C programming concepts.
+Enter article title to search for: C Programming Basics
+Article found
