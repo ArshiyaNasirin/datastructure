@@ -1,0 +1,219 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    int studentID;
+    char name[100];
+    float grade;
+} Student;
+
+// Function to search for a student by ID
+int search_student(Student* students, int size, int targetID) {
+    for (int i = 0; i < size; i++) {
+        if (students[i].studentID == targetID) {
+            return i; // Return the index if found
+        }
+    }
+    return -1; // Return -1 if not found
+}
+
+int main() {
+    int n, targetID;
+
+    // Input the number of students
+    printf("Enter the number of students: ");
+    scanf("%d", &n);
+
+    // Dynamically allocate memory for the students
+    Student* students = (Student*)malloc(n * sizeof(Student));
+    if (students == NULL) {
+        printf("Memory allocation failed\n");
+        return -1;
+    }
+
+    // Input student records
+    for (int i = 0; i < n; i++) {
+        printf("Enter student ID: ");
+        scanf("%d", &students[i].studentID);
+        getchar(); // To consume the newline character
+        printf("Enter student name: ");
+        fgets(students[i].name, 100, stdin);
+        printf("Enter student grade: ");
+        scanf("%f", &students[i].grade);
+    }
+
+    // Input the target student ID to search
+    printf("Enter student ID to search for: ");
+    scanf("%d", &targetID);
+
+    // Search for the student
+    int index = search_student(students, n, targetID);
+    if (index != -1) {
+        printf("Student found: ID: %d, Name: %s, Grade: %.2f\n", students[index].studentID, students[index].name, students[index].grade);
+    } else {
+        printf("Student with ID %d not found.\n", targetID);
+    }
+
+    // Free dynamically allocated memory
+    free(students);
+    return 0;
+}
+OUTPUT
+Enter the number of students: 2
+Enter student ID: 101
+Enter student name: John Doe
+Enter student grade: 89.5
+Enter student ID: 102
+Enter student name: Jane Smith
+Enter student grade: 92.0
+Enter student ID to search for: 101
+Student found: ID: 101, Name: John Doe, Grade: 89.50
+
+2.#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_USERS 1000
+#define MAX_USERNAME_LENGTH 100
+
+// Function to search a username using linear search
+int search_user(char** usernames, int size, const char* target_username) {
+    for (int i = 0; i < size; i++) {
+        if (strcmp(usernames[i], target_username) == 0) {
+            return i; // Return the index if found
+        }
+    }
+    return -1; // Return -1 if not found
+}
+
+int main() {
+    int n;
+    char target_username[MAX_USERNAME_LENGTH];
+
+    // Get number of users
+    printf("Enter the number of users: ");
+    scanf("%d", &n);
+
+    // Dynamically allocate memory for usernames
+    char** usernames = (char**)malloc(n * sizeof(char*));
+    if (usernames == NULL) {
+        printf("Memory allocation failed\n");
+        return -1;
+    }
+
+    // Input usernames
+    getchar(); // To consume the newline character
+    for (int i = 0; i < n; i++) {
+        usernames[i] = (char*)malloc(MAX_USERNAME_LENGTH * sizeof(char));
+        printf("Enter username %d: ", i + 1);
+        fgets(usernames[i], MAX_USERNAME_LENGTH, stdin);
+        usernames[i][strcspn(usernames[i], "\n")] = '\0'; // Remove newline character
+    }
+
+    // Input target username
+    printf("Enter username to search for: ");
+    fgets(target_username, MAX_USERNAME_LENGTH, stdin);
+    target_username[strcspn(target_username, "\n")] = '\0'; // Remove newline
+
+    // Search for the username
+    int index = search_user(usernames, n, target_username);
+    if (index != -1) {
+        printf("Username '%s' found at index %d.\n", usernames[index], index);
+    } else {
+        printf("Username not found.\n");
+    }
+
+    // Free dynamically allocated memory
+    for (int i = 0; i < n; i++) {
+        free(usernames[i]);
+    }
+    free(usernames);
+
+    return 0;
+}
+OUTPUT
+Enter the number of users: 3
+Enter username 1: alice
+Enter username 2: bob
+Enter username 3: charlie
+Enter username to search for: bob
+Username 'bob' found at index 1.
+
+
+3.#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_CONTACTS 100
+#define MAX_NAME_LENGTH 100
+#define MAX_PHONE_LENGTH 15
+
+typedef struct {
+    char name[MAX_NAME_LENGTH];
+    char phone[MAX_PHONE_LENGTH];
+} Contact;
+
+// Function to search a contact by name
+int search_contact(Contact* contacts, int size, const char* target_name) {
+    for (int i = 0; i < size; i++) {
+        if (strcmp(contacts[i].name, target_name) == 0) {
+            return i; // Return index if contact is found
+        }
+    }
+    return -1; // Return -1 if not found
+}
+
+int main() {
+    int n;
+    char target_name[MAX_NAME_LENGTH];
+
+    // Get number of contacts
+    printf("Enter number of contacts: ");
+    scanf("%d", &n);
+
+    // Dynamically allocate memory for contacts
+    Contact* contacts = (Contact*)malloc(n * sizeof(Contact));
+    if (contacts == NULL) {
+        printf("Memory allocation failed\n");
+        return -1;
+    }
+
+    // Input contact information
+    getchar(); // To consume the newline character
+    for (int i = 0; i < n; i++) {
+        printf("Enter contact %d name: ", i + 1);
+        fgets(contacts[i].name, MAX_NAME_LENGTH, stdin);
+        contacts[i].name[strcspn(contacts[i].name, "\n")] = '\0'; // Remove newline
+        printf("Enter contact %d phone: ", i + 1);
+        fgets(contacts[i].phone, MAX_PHONE_LENGTH, stdin);
+        contacts[i].phone[strcspn(contacts[i].phone, "\n")] = '\0'; // Remove newline
+    }
+
+    // Input target name to search
+    printf("Enter name to search for: ");
+    fgets(target_name, MAX_NAME_LENGTH, stdin);
+    target_name[strcspn(target_name, "\n")] = '\0'; // Remove newline
+
+    // Search for the contact
+    int index = search_contact(contacts, n, target_name);
+    if (index != -1) {
+        printf("Contact found: Name: %s, Phone: %s\n", contacts[index].name, contacts[index].phone);
+    } else {
+        printf("Contact not found.\n");
+    }
+
+    // Free dynamically allocated memory
+    free(contacts);
+
+    return 0;
+}
+OUTPUT
+Enter number of contacts: 3
+Enter contact 1 name: Alice
+Enter contact 1 phone: 1234567890
+Enter contact 2 name: Bob
+Enter contact 2 phone: 9876543210
+Enter contact 3 name: Charlie
+Enter contact 3 phone: 1122334455
+Enter name to search for: Bob
+Contact found: Name: Bob, Phone: 9876543210
