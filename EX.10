@@ -1,0 +1,426 @@
+1.#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_VERTICES 100
+#define INF 1000000
+
+// Edge structure to represent an edge with weight
+typedef struct {
+    int u, v, weight;
+} Edge;
+
+// Disjoint Set (Union-Find) structure
+int parent[MAX_VERTICES];
+int rank[MAX_VERTICES];
+
+// Function to find the parent of a set using path compression
+int find(int i) {
+    if (parent[i] != i)
+        parent[i] = find(parent[i]);  // Path compression
+    return parent[i];
+}
+
+// Function to union two sets
+void union_sets(int u, int v) {
+    int root_u = find(u);
+    int root_v = find(v);
+
+    if (root_u != root_v) {
+        // Union by rank
+        if (rank[root_u] > rank[root_v]) {
+            parent[root_v] = root_u;
+        } else if (rank[root_u] < rank[root_v]) {
+            parent[root_u] = root_v;
+        } else {
+            parent[root_v] = root_u;
+            rank[root_u]++;
+        }
+    }
+}
+
+// Function to compare two edges based on their weights (for sorting)
+int compare_edges(const void* a, const void* b) {
+    return ((Edge*)a)->weight - ((Edge*)b)->weight;
+}
+
+// Kruskal's Algorithm to find the MST
+int kruskal(Edge edges[], int num_edges, int num_vertices) {
+    // Initialize the disjoint-set data structure
+    for (int i = 0; i < num_vertices; i++) {
+        parent[i] = i;
+        rank[i] = 0;
+    }
+
+    // Sort all edges in non-decreasing order of their weight
+    qsort(edges, num_edges, sizeof(Edge), compare_edges);
+
+    int mst_weight = 0;  // Total weight of MST
+    int edge_count = 0;  // Number of edges in MST
+
+    // Loop through all edges and include them in the MST if they don’t form a cycle
+    for (int i = 0; i < num_edges; i++) {
+        int u = edges[i].u;
+        int v = edges[i].v;
+        int weight = edges[i].weight;
+
+        if (find(u) != find(v)) {
+            union_sets(u, v);
+            mst_weight += weight;
+            edge_count++;
+            printf("Edge (%d, %d) with weight %d is included in the MST\n", u, v, weight);
+        }
+
+        // If we've included enough edges, we can stop
+        if (edge_count == num_vertices - 1) break;
+    }
+
+    return mst_weight;
+}
+
+// Function to add an edge to the graph
+void add_edge(Edge edges[], int *num_edges, int u, int v, int weight) {
+    edges[*num_edges].u = u;
+    edges[*num_edges].v = v;
+    edges[*num_edges].weight = weight;
+    (*num_edges)++;
+}
+
+int main() {
+    int num_vertices, num_edges, choice;
+    Edge edges[MAX_VERTICES * MAX_VERTICES];
+    int num_edges_current = 0;
+
+    printf("Enter the number of locations: ");
+    scanf("%d", &num_vertices);
+
+    // Add some initial edges based on the scenario
+    // (This can be dynamically updated based on user input)
+    do {
+        printf("\nMenu:\n");
+        printf("1. Add a new road/cable/powerline (edge)\n");
+        printf("2. Calculate the Minimum Spanning Tree (MST)\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: {
+                int u, v, weight;
+                printf("Enter the two locations (u, v) and the weight (distance/cost): ");
+                scanf("%d %d %d", &u, &v, &weight);
+                add_edge(edges, &num_edges_current, u, v, weight);
+                break;
+            }
+            case 2: {
+                int mst_weight = kruskal(edges, num_edges_current, num_vertices);
+                printf("Total weight of the Minimum Spanning Tree: %d\n", mst_weight);
+                break;
+            }
+            case 3:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice! Try again.\n");
+        }
+    } while (choice != 3);
+
+    return 0;
+}
+
+2.#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_OFFICES 100
+#define INF 1000000
+
+// Edge structure to represent an edge with weight (cable length)
+typedef struct {
+    int u, v, weight;  // u and v are the office locations (vertices), weight is the cable length
+} Edge;
+
+// Disjoint Set Union (DSU) structure
+int parent[MAX_OFFICES];
+int rank[MAX_OFFICES];
+
+// Function to find the parent of a set (with path compression)
+int find(int i) {
+    if (parent[i] != i)
+        parent[i] = find(parent[i]);  // Path compression
+    return parent[i];
+}
+
+// Function to union two sets (using union by rank)
+void union_sets(int u, int v) {
+    int root_u = find(u);
+    int root_v = find(v);
+
+    if (root_u != root_v) {
+        // Union by rank
+        if (rank[root_u] > rank[root_v]) {
+            parent[root_v] = root_u;
+        } else if (rank[root_u] < rank[root_v]) {
+            parent[root_u] = root_v;
+        } else {
+            parent[root_v] = root_u;
+            rank[root_u]++;
+        }
+    }
+}
+
+// Function to compare two edges based on their weight (used in sorting)
+int compare_edges(const void* a, const void* b) {
+    return ((Edge*)a)->weight - ((Edge*)b)->weight;
+}
+
+// Kruskal's Algorithm to find the Minimum Spanning Tree (MST)
+int kruskal(Edge edges[], int num_edges, int num_offices) {
+    // Initialize the disjoint-set (Union-Find) data structure
+    for (int i = 0; i < num_offices; i++) {
+        parent[i] = i;
+        rank[i] = 0;
+    }
+
+    // Sort edges based on their weight (cable length)
+    qsort(edges, num_edges, sizeof(Edge), compare_edges);
+
+    int mst_weight = 0;  // Total weight of the MST (total cable length)
+    int edge_count = 0;  // Number of edges in the MST
+
+    // Loop through the sorted edges and add them to the MST if they don’t form a cycle
+    for (int i = 0; i < num_edges; i++) {
+        int u = edges[i].u;
+        int v = edges[i].v;
+        int weight = edges[i].weight;
+
+        if (find(u) != find(v)) {
+            union_sets(u, v);  // Union the two offices
+            mst_weight += weight;
+            edge_count++;
+            printf("Cable from Office %d to Office %d with length %d is included in the MST\n", u, v, weight);
+        }
+
+        // If the MST contains num_offices - 1 edges, stop
+        if (edge_count == num_offices - 1) break;
+    }
+
+    return mst_weight;  // Return the total cable length used in the MST
+}
+
+// Function to add an edge (cable) between two offices
+void add_edge(Edge edges[], int *num_edges, int u, int v, int weight) {
+    edges[*num_edges].u = u;
+    edges[*num_edges].v = v;
+    edges[*num_edges].weight = weight;
+    (*num_edges)++;
+}
+
+int main() {
+    int num_offices, num_edges, choice;
+    Edge edges[MAX_OFFICES * MAX_OFFICES];  // Maximum number of edges
+    int num_edges_current = 0;  // Current number of edges in the graph
+
+    printf("Enter the number of offices: ");
+    scanf("%d", &num_offices);
+
+    // Interactive menu to add edges or compute the MST
+    do {
+        printf("\nMenu:\n");
+        printf("1. Add a new cable connection (edge)\n");
+        printf("2. Calculate the Minimum Spanning Tree (MST)\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: {
+                int u, v, weight;
+                printf("Enter the two offices (u, v) and the cable length (weight): ");
+                scanf("%d %d %d", &u, &v, &weight);
+                add_edge(edges, &num_edges_current, u, v, weight);
+                break;
+            }
+            case 2: {
+                int mst_weight = kruskal(edges, num_edges_current, num_offices);
+                printf("Total cable length for the Minimum Spanning Tree: %d\n", mst_weight);
+                break;
+            }
+            case 3:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice! Try again.\n");
+        }
+    } while (choice != 3);
+
+    return 0;
+}
+OUTPUT
+Enter the number of offices: 4
+
+Menu:
+1. Add a new cable connection (edge)
+2. Calculate the Minimum Spanning Tree (MST)
+3. Exit
+Enter your choice: 1
+Enter the two offices (u, v) and the cable length (weight): 0 1 5
+
+Menu:
+1. Add a new cable connection (edge)
+2. Calculate the Minimum Spanning Tree (MST)
+3. Exit
+Enter your choice: 1
+Enter the two offices (u, v) and the cable length (weight): 1 2 7
+
+Menu:
+1. Add a new cable connection (edge)
+2. Calculate the Minimum Spanning Tree (MST)
+3. Exit
+Enter your choice: 2
+Cable from Office 0 to Office 1 with length 5 is included in the MST
+Cable from Office 1 to Office 2 with length 7 is included in the MST
+Cable from Office 2 to Office 3 with length 6 is included in the MST
+Total cable length for the Minimum Spanning Tree: 18
+
+3.#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_TOWNS 100
+#define INF 1000000
+
+// Edge structure to represent an edge (power line) with weight (cost)
+typedef struct {
+    int u, v, weight;  // u and v are the towns (vertices), weight is the cost of the power line
+} Edge;
+
+// Disjoint Set Union (DSU) structure
+int parent[MAX_TOWNS];
+int rank[MAX_TOWNS];
+
+// Function to find the parent of a set (with path compression)
+int find(int i) {
+    if (parent[i] != i)
+        parent[i] = find(parent[i]);  // Path compression
+    return parent[i];
+}
+
+// Function to union two sets (using union by rank)
+void union_sets(int u, int v) {
+    int root_u = find(u);
+    int root_v = find(v);
+
+    if (root_u != root_v) {
+        // Union by rank
+        if (rank[root_u] > rank[root_v]) {
+            parent[root_v] = root_u;
+        } else if (rank[root_u] < rank[root_v]) {
+            parent[root_u] = root_v;
+        } else {
+            parent[root_v] = root_u;
+            rank[root_u]++;
+        }
+    }
+}
+
+// Function to compare two edges based on their weight (used in sorting)
+int compare_edges(const void* a, const void* b) {
+    return ((Edge*)a)->weight - ((Edge*)b)->weight;
+}
+
+// Kruskal's Algorithm to find the Minimum Spanning Tree (MST)
+int kruskal(Edge edges[], int num_edges, int num_towns) {
+    // Initialize the disjoint-set (Union-Find) data structure
+    for (int i = 0; i < num_towns; i++) {
+        parent[i] = i;
+        rank[i] = 0;
+    }
+
+    // Sort edges based on their weight (cost)
+    qsort(edges, num_edges, sizeof(Edge), compare_edges);
+
+    int mst_weight = 0;  // Total weight of the MST (total cable length)
+    int edge_count = 0;  // Number of edges in the MST
+
+    // Loop through the sorted edges and add them to the MST if they don’t form a cycle
+    for (int i = 0; i < num_edges; i++) {
+        int u = edges[i].u;
+        int v = edges[i].v;
+        int weight = edges[i].weight;
+
+        if (find(u) != find(v)) {
+            union_sets(u, v);  // Union the two towns
+            mst_weight += weight;
+            edge_count++;
+            printf("Power line from Town %d to Town %d with cost %d is included in the MST\n", u, v, weight);
+        }
+
+        // If the MST contains num_towns - 1 edges, stop
+        if (edge_count == num_towns - 1) break;
+    }
+
+    return mst_weight;  // Return the total cost of the power lines in the MST
+}
+
+// Function to add an edge (power line) between two towns
+void add_edge(Edge edges[], int *num_edges, int u, int v, int weight) {
+    edges[*num_edges].u = u;
+    edges[*num_edges].v = v;
+    edges[*num_edges].weight = weight;
+    (*num_edges)++;
+}
+
+int main() {
+    int num_towns, num_edges, choice;
+    Edge edges[MAX_TOWNS * MAX_TOWNS];  // Maximum number of edges (towns * towns)
+    int num_edges_current = 0;  // Current number of edges in the graph
+
+    printf("Enter the number of towns: ");
+    scanf("%d", &num_towns);
+
+    // Interactive menu to add edges or compute the MST
+    do {
+        printf("\nMenu:\n");
+        printf("1. Add a new power line (edge)\n");
+        printf("2. Calculate the Minimum Spanning Tree (MST)\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: {
+                int u, v, weight;
+                printf("Enter the two towns (u, v) and the cost (weight) of the power line: ");
+                scanf("%d %d %d", &u, &v, &weight);
+                add_edge(edges, &num_edges_current, u, v, weight);
+                break;
+            }
+            case 2: {
+                int mst_weight = kruskal(edges, num_edges_current, num_towns);
+                printf("Total cost for the Minimum Spanning Tree (MST): %d\n", mst_weight);
+                break;
+            }
+            case 3:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice! Try again.\n");
+        }
+    } while (choice != 3);
+
+    return 0;
+}
+OUTPUT
+Enter the number of towns: 5
+
+Menu:
+1. Add a new power line (edge)
+2. Calculate the Minimum Spanning Tree (MST)
+3. Exit
+Enter your choice: 1
+Enter the two towns (u, v) and the cost (weight) of the power line: 0 1 10
+
+Menu:
+1. Add a new power line (edge)
+2. Calculate the Minimum Spanning Tree (MST)
+3. Exit
+Enter your choice: 1
+Enter the two towns (u, v) and the cost (weight) of the power line: 
