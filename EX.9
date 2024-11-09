@@ -1,0 +1,341 @@
+1.#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX_LOCATIONS 100
+#define INF INT_MAX
+
+// Graph structure (adjacency matrix)
+int graph[MAX_LOCATIONS][MAX_LOCATIONS];
+int num_locations;
+
+// Function to find the location with the minimum distance
+int min_distance(int dist[], int sptSet[]) {
+    int min = INF, min_index;
+    for (int v = 0; v < num_locations; v++) {
+        if (!sptSet[v] && dist[v] <= min) {
+            min = dist[v];
+            min_index = v;
+        }
+    }
+    return min_index;
+}
+
+// Dijkstra's algorithm to find the shortest path from the source location
+void dijkstra(int source) {
+    int dist[num_locations];   // Shortest distance from source
+    int sptSet[num_locations]; // Shortest Path Tree Set
+
+    // Initialize distances as INFINITE and sptSet as false
+    for (int i = 0; i < num_locations; i++) {
+        dist[i] = INF;
+        sptSet[i] = 0;
+    }
+
+    // Distance from the source to itself is always 0
+    dist[source] = 0;
+
+    // Find the shortest path for all locations
+    for (int count = 0; count < num_locations - 1; count++) {
+        int u = min_distance(dist, sptSet); // Find the location with the minimum distance
+        sptSet[u] = 1; // Mark the location as processed
+
+        // Update distance of the adjacent locations
+        for (int v = 0; v < num_locations; v++) {
+            if (!sptSet[v] && graph[u][v] && dist[u] != INF && dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+            }
+        }
+    }
+
+    // Print the computed shortest distances
+    printf("Shortest paths from location %d:\n", source);
+    for (int i = 0; i < num_locations; i++) {
+        if (dist[i] == INF) {
+            printf("Location %d is unreachable.\n", i);
+        } else {
+            printf("To Location %d: %d\n", i, dist[i]);
+        }
+    }
+}
+
+// Function to update a route between two locations
+void update_route(int from, int to, int distance) {
+    graph[from][to] = distance;
+    graph[to][from] = distance; // Assuming undirected graph (bidirectional route)
+}
+
+int main() {
+    printf("Enter the number of locations: ");
+    scanf("%d", &num_locations);
+
+    // Initialize the graph with no routes
+    for (int i = 0; i < num_locations; i++) {
+        for (int j = 0; j < num_locations; j++) {
+            graph[i][j] = 0;
+        }
+    }
+
+    // Add some routes between locations
+    update_route(0, 1, 10);  // Route from location 0 to location 1 with distance 10
+    update_route(0, 2, 20);  // Route from location 0 to location 2 with distance 20
+    update_route(1, 3, 5);   // Route from location 1 to location 3 with distance 5
+    update_route(2, 3, 10);  // Route from location 2 to location 3 with distance 10
+
+    int source;
+    printf("Enter source location for shortest path calculation: ");
+    scanf("%d", &source);
+
+    dijkstra(source);
+
+    return 0;
+}
+
+2.#include <stdio.h>
+#include <stdlib.h>
+#include <queue>
+
+#define MAX 100
+#define INF 99999999
+
+// Direction arrays for moving in the grid (up, down, left, right)
+int dx[] = {-1, 1, 0, 0};
+int dy[] = {0, 0, -1, 1};
+
+int **grid, **dist;
+int n, m;
+
+// Check if a cell is within grid bounds and not blocked
+int is_valid(int x, int y) {
+    return (x >= 0 && x < n && y >= 0 && y < m && grid[x][y] == 0); // 0 means empty cell
+}
+
+// BFS to find the shortest path from (startX, startY) to (endX, endY)
+void bfs(int startX, int startY, int endX, int endY) {
+    std::queue<std::pair<int, int>> q;
+    dist[startX][startY] = 0;
+    q.push({startX, startY});
+
+    while (!q.empty()) {
+        int x = q.front().first;
+        int y = q.front().second;
+        q.pop();
+
+        // If we reach the destination
+        if (x == endX && y == endY) {
+            printf("Shortest path length: %d\n", dist[x][y]);
+            return;
+        }
+
+        // Explore the four possible directions
+        for (int i = 0; i < 4; i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+            if (is_valid(nx, ny) && dist[nx][ny] == INF) {
+                dist[nx][ny] = dist[x][y] + 1;
+                q.push({nx, ny});
+            }
+        }
+    }
+
+    printf("No path found!\n");
+}
+
+int main() {
+    // Input grid size and start/end positions
+    printf("Enter the grid dimensions (rows and columns): ");
+    scanf("%d %d", &n, &m);
+
+    grid = (int **)malloc(n * sizeof(int *));
+    dist = (int **)malloc(n * sizeof(int *));
+    for (int i = 0; i < n; i++) {
+        grid[i] = (int *)malloc(m * sizeof(int));
+        dist[i] = (int *)malloc(m * sizeof(int));
+    }
+
+    printf("Enter the grid (0 for empty cell, 1 for obstacle):\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            scanf("%d", &grid[i][j]);
+            dist[i][j] = INF; // Initialize distances as INF
+        }
+    }
+
+    int startX, startY, endX, endY;
+    printf("Enter start position (x y): ");
+    scanf("%d %d", &startX, &startY);
+    printf("Enter end position (x y): ");
+    scanf("%d %d", &endX, &endY);
+
+    bfs(startX, startY, endX, endY);
+
+    // Free dynamically allocated memory
+    for (int i = 0; i < n; i++) {
+        free(grid[i]);
+        free(dist[i]);
+    }
+    free(grid);
+    free(dist);
+
+    return 0;
+}
+
+3.#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX_LOCATIONS 100
+#define INF INT_MAX
+
+// Graph structure (adjacency matrix)
+int graph[MAX_LOCATIONS][MAX_LOCATIONS];
+int num_locations;
+
+// Function to find the location with the minimum distance
+int min_distance(int dist[], int sptSet[]) {
+    int min = INF, min_index;
+    for (int v = 0; v < num_locations; v++) {
+        if (!sptSet[v] && dist[v] <= min) {
+            min = dist[v];
+            min_index = v;
+        }
+    }
+    return min_index;
+}
+
+// Dijkstra's algorithm to find the shortest path from the source location
+void dijkstra(int source) {
+    int dist[num_locations];   // Shortest distance from source
+    int sptSet[num_locations]; // Shortest Path Tree Set
+
+    // Initialize distances as INFINITE and sptSet as false
+    for (int i = 0; i < num_locations; i++) {
+        dist[i] = INF;
+        sptSet[i] = 0;
+    }
+
+    // Distance from the source to itself is always 0
+    dist[source] = 0;
+
+    // Find the shortest path for all locations
+    for (int count = 0; count < num_locations - 1; count++) {
+        int u = min_distance(dist, sptSet); // Find the location with the minimum distance
+        sptSet[u] = 1; // Mark the location as processed
+
+        // Update distance of the adjacent locations
+        for (int v = 0; v < num_locations; v++) {
+            if (!sptSet[v] && graph[u][v] && dist[u] != INF && dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+            }
+        }
+    }
+
+    // Print the computed shortest distances
+    printf("Shortest paths from location %d:\n", source);
+    for (int i = 0; i < num_locations; i++) {
+        if (dist[i] == INF) {
+            printf("Location %d is unreachable.\n", i);
+        } else {
+            printf("To Location %d: %d\n", i, dist[i]);
+        }
+    }
+}
+
+// Function to update a route between two locations
+void update_route(int from, int to, int distance) {
+    graph[from][to] = distance;
+    graph[to][from] = distance; // Assuming undirected graph (bidirectional route)
+}
+
+// Function to add a new location (expand the graph)
+void add_location() {
+    num_locations++;
+    for (int i = 0; i < num_locations; i++) {
+        graph[i][num_locations - 1] = 0;
+        graph[num_locations - 1][i] = 0;
+    }
+    printf("New location added. Total locations: %d\n", num_locations);
+}
+
+// Function to remove a location (update the graph)
+void remove_location(int location) {
+    if (location < 0 || location >= num_locations) {
+        printf("Invalid location index.\n");
+        return;
+    }
+
+    // Shift the rows and columns to remove the location
+    for (int i = location; i < num_locations - 1; i++) {
+        for (int j = 0; j < num_locations; j++) {
+            graph[i][j] = graph[i + 1][j];
+            graph[j][i] = graph[j][i + 1];
+        }
+    }
+
+    num_locations--;
+    printf("Location %d removed. Total locations: %d\n", location, num_locations);
+}
+
+int main() {
+    printf("Enter the number of locations: ");
+    scanf("%d", &num_locations);
+
+    // Initialize the graph with no routes
+    for (int i = 0; i < num_locations; i++) {
+        for (int j = 0; j < num_locations; j++) {
+            graph[i][j] = 0;
+        }
+    }
+
+    // Add some initial routes between locations
+    update_route(0, 1, 10);  // Route from location 0 to location 1 with distance 10
+    update_route(0, 2, 20);  // Route from location 0 to location 2 with distance 20
+    update_route(1, 3, 5);   // Route from location 1 to location 3 with distance 5
+    update_route(2, 3, 10);  // Route from location 2 to location 3 with distance 10
+
+    int choice;
+    do {
+        printf("\nMenu:\n");
+        printf("1. Calculate shortest paths from a location\n");
+        printf("2. Update route between two locations\n");
+        printf("3. Add a new location\n");
+        printf("4. Remove a location\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: {
+                int source;
+                printf("Enter source location for shortest path calculation: ");
+                scanf("%d", &source);
+                dijkstra(source);
+                break;
+            }
+            case 2: {
+                int from, to, distance;
+                printf("Enter the source location, destination location, and distance: ");
+                scanf("%d %d %d", &from, &to, &distance);
+                update_route(from, to, distance);
+                break;
+            }
+            case 3:
+                add_location();
+                break;
+            case 4: {
+                int location;
+                printf("Enter the location to remove: ");
+                scanf("%d", &location);
+                remove_location(location);
+                break;
+            }
+            case 5:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice, please try again.\n");
+        }
+    } while (choice != 5);
+
+    return 0;
+}
