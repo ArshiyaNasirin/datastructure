@@ -1,0 +1,317 @@
+1.#include <stdio.h>
+#include <string.h>
+
+#define MAX_JOBS 100
+
+typedef struct {
+    char job_name[50];
+    int job_id;
+} PrintJob;
+
+PrintJob queue[MAX_JOBS];
+int front = -1, rear = -1;
+
+void enqueue(PrintJob job) {
+    if (rear == MAX_JOBS - 1) {
+        printf("Print queue is full!\n");
+        return;
+    }
+    if (front == -1) front = 0;
+    rear++;
+    queue[rear] = job;
+}
+
+PrintJob dequeue() {
+    if (front == -1 || front > rear) {
+        printf("No jobs in the queue.\n");
+        PrintJob empty_job = {"", -1};
+        return empty_job;
+    }
+    PrintJob job = queue[front];
+    front++;
+    return job;
+}
+
+void display_queue() {
+    if (front == -1 || front > rear) {
+        printf("No jobs in the queue.\n");
+    } else {
+        printf("Current print queue:\n");
+        for (int i = front; i <= rear; i++) {
+            printf("Job ID: %d, Job Name: %s\n", queue[i].job_id, queue[i].job_name);
+        }
+    }
+}
+
+int main() {
+    PrintJob job1 = {"Document1", 1};
+    PrintJob job2 = {"Document2", 2};
+    
+    enqueue(job1);
+    enqueue(job2);
+    
+    display_queue();
+    
+    dequeue();
+    display_queue();
+    
+    return 0;
+}
+
+2.#include <stdio.h>
+#include <string.h>
+
+#define MAX_CUSTOMERS 100
+
+typedef struct {
+    char customer_name[50];
+    int customer_id;
+} Customer;
+
+Customer queue[MAX_CUSTOMERS];
+int front = -1, rear = -1;
+
+void add_customer(Customer customer) {
+    if (rear == MAX_CUSTOMERS - 1) {
+        printf("Queue is full!\n");
+        return;
+    }
+    if (front == -1) front = 0;
+    rear++;
+    queue[rear] = customer;
+}
+
+Customer serve_customer() {
+    if (front == -1 || front > rear) {
+        printf("No customers in the queue.\n");
+        Customer empty_customer = {"", -1};
+        return empty_customer;
+    }
+    Customer customer = queue[front];
+    front++;
+    return customer;
+}
+
+void display_queue() {
+    if (front == -1 || front > rear) {
+        printf("No customers in the queue.\n");
+    } else {
+        printf("Current queue of customers:\n");
+        for (int i = front; i <= rear; i++) {
+            printf("Customer ID: %d, Customer Name: %s\n", queue[i].customer_id, queue[i].customer_name);
+        }
+    }
+}
+
+int main() {
+    Customer customer1 = {"John Doe", 1};
+    Customer customer2 = {"Jane Smith", 2};
+    
+    add_customer(customer1);
+    add_customer(customer2);
+    
+    display_queue();
+    
+    serve_customer();
+    display_queue();
+    
+    return 0;
+}
+
+3.#include <stdio.h>
+#include <string.h>
+
+#define MAX_CALLS 100
+
+typedef struct {
+    char caller_name[50];
+    int call_id;
+} Call;
+
+Call queue[MAX_CALLS];
+int front = -1, rear = -1;
+
+void enqueue_call(Call call) {
+    if (rear == MAX_CALLS - 1) {
+        printf("Call queue is full!\n");
+        return;
+    }
+    if (front == -1) front = 0;
+    rear++;
+    queue[rear] = call;
+}
+
+Call dequeue_call() {
+    if (front == -1 || front > rear) {
+        printf("No calls in the queue.\n");
+        Call empty_call = {"", -1};
+        return empty_call;
+    }
+    Call call = queue[front];
+    front++;
+    return call;
+}
+
+void display_calls() {
+    if (front == -1 || front > rear) {
+        printf("No calls in the queue.\n");
+    } else {
+        printf("Current call queue:\n");
+        for (int i = front; i <= rear; i++) {
+            printf("Call ID: %d, Caller Name: %s\n", queue[i].call_id, queue[i].caller_name);
+        }
+    }
+}
+
+int main() {
+    Call call1 = {"Alice", 1};
+    Call call2 = {"Bob", 2};
+    
+    enqueue_call(call1);
+    enqueue_call(call2);
+    
+    display_calls();
+    
+    dequeue_call();
+    display_calls();
+    
+    return 0;
+}
+
+4.#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Inquiry {
+    char inquiry_text[100];
+    int inquiry_id;
+    struct Inquiry* next;
+} Inquiry;
+
+Inquiry* front = NULL;
+Inquiry* rear = NULL;
+
+void add_inquiry(char text[], int id) {
+    Inquiry* new_inquiry = (Inquiry*)malloc(sizeof(Inquiry));
+    strcpy(new_inquiry->inquiry_text, text);
+    new_inquiry->inquiry_id = id;
+    new_inquiry->next = NULL;
+
+    if (rear == NULL) {
+        front = rear = new_inquiry;
+    } else {
+        rear->next = new_inquiry;
+        rear = new_inquiry;
+    }
+}
+
+Inquiry* resolve_inquiry() {
+    if (front == NULL) {
+        printf("No inquiries to resolve.\n");
+        return NULL;
+    }
+    Inquiry* temp = front;
+    front = front->next;
+    if (front == NULL) {
+        rear = NULL;
+    }
+    return temp;
+}
+
+void display_inquiries() {
+    if (front == NULL) {
+        printf("No inquiries in the queue.\n");
+    } else {
+        Inquiry* temp = front;
+        while (temp != NULL) {
+            printf("Inquiry ID: %d, Inquiry: %s\n", temp->inquiry_id, temp->inquiry_text);
+            temp = temp->next;
+        }
+    }
+}
+
+int main() {
+    add_inquiry("Issue with the product", 1);
+    add_inquiry("Need a refund", 2);
+    
+    display_inquiries();
+    
+    Inquiry* resolved = resolve_inquiry();
+    if (resolved) {
+        printf("Resolved Inquiry: %d, %s\n", resolved->inquiry_id, resolved->inquiry_text);
+        free(resolved);
+    }
+    display_inquiries();
+    
+    return 0;
+}
+
+5.#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Customer {
+    char customer_name[50];
+    int customer_id;
+    struct Customer* next;
+} Customer;
+
+Customer* front = NULL;
+Customer* rear = NULL;
+
+void enqueue_customer(char name[], int id) {
+    Customer* new_customer = (Customer*)malloc(sizeof(Customer));
+    strcpy(new_customer->customer_name, name);
+    new_customer->customer_id = id;
+    new_customer->next = NULL;
+
+    if (rear == NULL) {
+        front = rear = new_customer;
+    } else {
+        rear->next = new_customer;
+        rear = new_customer;
+    }
+}
+
+Customer* dequeue_customer() {
+    if (front == NULL) {
+        printf("No customers in the queue.\n");
+        return NULL;
+    }
+    Customer* temp = front;
+    front = front->next;
+    if (front == NULL) {
+        rear = NULL;
+    }
+    return temp;
+}
+
+void display_customers() {
+    if (front == NULL) {
+        printf("No customers in the queue.\n");
+    } else {
+        Customer* temp = front;
+        while (temp != NULL) {
+            printf("Customer ID: %d, Customer Name: %s\n", temp->customer_id, temp->customer_name);
+            temp = temp->next;
+        }
+    }
+}
+
+int main() {
+    enqueue_customer("John Doe", 1);
+    enqueue_customer("Jane Smith", 2);
+    
+    display_customers();
+    
+    Customer* served = dequeue_customer();
+    if (served) {
+        printf("Serving Customer: %d, %s\n", served->customer_id, served->customer_name);
+        free(served);
+    }
+    display_customers();
+    
+    return 0;
+}
+
+
