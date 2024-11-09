@@ -1,0 +1,178 @@
+1.#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+#define MAX_STACK_SIZE 100
+
+// Stack structure to hold integers
+int stack[MAX_STACK_SIZE];
+int top = -1;
+
+// Function to push an element onto the stack
+void push(int value) {
+    if (top == MAX_STACK_SIZE - 1) {
+        printf("Stack overflow!\n");
+        return;
+    }
+    stack[++top] = value;
+}
+
+// Function to pop an element from the stack
+int pop() {
+    if (top == -1) {
+        printf("Stack underflow!\n");
+        return -1;
+    }
+    return stack[top--];
+}
+
+// Function to evaluate a postfix expression
+int evaluate_postfix(char* expression) {
+    for (int i = 0; expression[i] != '\0'; i++) {
+        char current = expression[i];
+
+        if (isdigit(current)) {
+            // If the character is a digit, push its integer value onto the stack
+            push(current - '0');
+        } else if (current == '+' || current == '-' || current == '*' || current == '/') {
+            // If the character is an operator, pop two values and apply the operator
+            int operand2 = pop();
+            int operand1 = pop();
+            int result = 0;
+
+            if (current == '+') {
+                result = operand1 + operand2;
+            } else if (current == '-') {
+                result = operand1 - operand2;
+            } else if (current == '*') {
+                result = operand1 * operand2;
+            } else if (current == '/') {
+                result = operand1 / operand2;
+            }
+
+            // Push the result back onto the stack
+            push(result);
+        }
+    }
+
+    // The result is the only element left in the stack
+    return pop();
+}
+
+int main() {
+    char expression[] = "23 45 + 6 *"; // Example postfix expression
+    int result = evaluate_postfix(expression);
+    printf("Result: %d\n", result); // Expected output: 30
+    return 0;
+}
+
+2.#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_STACK_SIZE 100
+
+char stack[MAX_STACK_SIZE];
+int top = -1;
+
+// Function to push a character onto the stack
+void push(char c) {
+    if (top == MAX_STACK_SIZE - 1) {
+        printf("Stack overflow!\n");
+        return;
+    }
+    stack[++top] = c;
+}
+
+// Function to pop a character from the stack
+char pop() {
+    if (top == -1) {
+        return -1; // Stack is empty
+    }
+    return stack[top--];
+}
+
+// Function to check if parentheses are balanced
+int is_balanced(char* expression) {
+    for (int i = 0; expression[i] != '\0'; i++) {
+        char current = expression[i];
+
+        // Push opening brackets onto the stack
+        if (current == '(' || current == '{' || current == '[') {
+            push(current);
+        }
+
+        // If it's a closing bracket, check for a matching opening bracket
+        if (current == ')' || current == '}' || current == ']') {
+            char top_char = pop();
+            if ((current == ')' && top_char != '(') ||
+                (current == '}' && top_char != '{') ||
+                (current == ']' && top_char != '[')) {
+                return 0; // Mismatch found
+            }
+        }
+    }
+
+    // If stack is empty, the parentheses are balanced
+    return top == -1;
+}
+
+int main() {
+    char expression[] = "{[()]}"; // Example expression
+    if (is_balanced(expression)) {
+        printf("The parentheses are balanced.\n");
+    } else {
+        printf("The parentheses are not balanced.\n");
+    }
+    return 0;
+}
+
+
+3.#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_STACK_SIZE 100
+
+char stack[MAX_STACK_SIZE];
+int top = -1;
+
+// Function to push a character onto the stack
+void push(char c) {
+    if (top == MAX_STACK_SIZE - 1) {
+        printf("Stack overflow!\n");
+        return;
+    }
+    stack[++top] = c;
+}
+
+// Function to pop a character from the stack
+char pop() {
+    if (top == -1) {
+        return -1; // Stack is empty
+    }
+    return stack[top--];
+}
+
+// Function to reverse a string using a stack
+void reverse_string(char* str) {
+    // Push all characters of the string onto the stack
+    for (int i = 0; str[i] != '\0'; i++) {
+        push(str[i]);
+    }
+
+    // Pop all characters from the stack and overwrite the string
+    for (int i = 0; str[i] != '\0'; i++) {
+        str[i] = pop();
+    }
+}
+
+int main() {
+    char str[] = "Hello World!"; // Example string
+    printf("Original String: %s\n", str);
+    
+    reverse_string(str);
+    
+    printf("Reversed String: %s\n", str); // Expected output: "!dlroW olleH"
+    return 0;
+}
