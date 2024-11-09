@@ -1,0 +1,277 @@
+1.#include <stdio.h>
+#include <string.h>
+
+#define MAX_HISTORY 100
+
+char history[MAX_HISTORY][200];
+int top = -1;
+
+void push_url(char url[]) {
+    if (top < MAX_HISTORY - 1) {
+        top++;
+        strcpy(history[top], url);
+    } else {
+        printf("History stack is full.\n");
+    }
+}
+
+void pop_url() {
+    if (top == -1) {
+        printf("No history to pop.\n");
+    } else {
+        printf("Popped URL: %s\n", history[top]);
+        top--;
+    }
+}
+
+void display_history() {
+    if (top == -1) {
+        printf("No browsing history.\n");
+    } else {
+        printf("Browsing history:\n");
+        for (int i = top; i >= 0; i--) {
+            printf("%s\n", history[i]);
+        }
+    }
+}
+
+int main() {
+    push_url("https://www.google.com");
+    push_url("https://www.stackoverflow.com");
+    push_url("https://www.github.com");
+    display_history();
+    pop_url();
+    display_history();
+    return 0;
+}
+
+
+2.#include <stdio.h>
+#include <string.h>
+
+#define MAX_CHANGES 100
+
+char changes[MAX_CHANGES][200];
+int top = -1;
+
+void push_change(char change[]) {
+    if (top < MAX_CHANGES - 1) {
+        top++;
+        strcpy(changes[top], change);
+    } else {
+        printf("Change stack is full.\n");
+    }
+}
+
+void pop_change() {
+    if (top == -1) {
+        printf("No changes to undo.\n");
+    } else {
+        printf("Undo change: %s\n", changes[top]);
+        top--;
+    }
+}
+
+void display_changes() {
+    if (top == -1) {
+        printf("No changes made.\n");
+    } else {
+        printf("Change history:\n");
+        for (int i = top; i >= 0; i--) {
+            printf("%s\n", changes[i]);
+        }
+    }
+}
+
+int main() {
+    push_change("Added text: Hello World");
+    push_change("Deleted text: Hello");
+    push_change("Added text: New Paragraph");
+    display_changes();
+    pop_change();
+    display_changes();
+    return 0;
+}
+
+
+3.#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#define MAX_SIZE 100
+
+char stack[MAX_SIZE];
+int top = -1;
+
+int precedence(char operator) {
+    if (operator == '+' || operator == '-') {
+        return 1;
+    } else if (operator == '*' || operator == '/') {
+        return 2;
+    }
+    return 0;
+}
+
+void push(char c) {
+    if (top < MAX_SIZE - 1) {
+        top++;
+        stack[top] = c;
+    }
+}
+
+char pop() {
+    if (top == -1) {
+        return -1;
+    }
+    char c = stack[top];
+    top--;
+    return c;
+}
+
+void infix_to_postfix(char* expression) {
+    char result[MAX_SIZE];
+    int k = 0;
+    
+    for (int i = 0; i < strlen(expression); i++) {
+        char current = expression[i];
+        
+        if (isalnum(current)) {
+            result[k++] = current;
+        } else if (current == '(') {
+            push(current);
+        } else if (current == ')') {
+            while (top != -1 && stack[top] != '(') {
+                result[k++] = pop();
+            }
+            pop();  // Remove '(' from the stack
+        } else if (current == '+' || current == '-' || current == '*' || current == '/') {
+            while (top != -1 && precedence(stack[top]) >= precedence(current)) {
+                result[k++] = pop();
+            }
+            push(current);
+        }
+    }
+
+    while (top != -1) {
+        result[k++] = pop();
+    }
+    result[k] = '\0';
+
+    printf("Postfix expression: %s\n", result);
+}
+
+int main() {
+    char infix[] = "a+b*(c^d-e)^(f+g*h)-i";
+    infix_to_postfix(infix);
+    return 0;
+}
+
+
+4.#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Move {
+    int move_number;
+    char description[100];
+    struct Move* next;
+} Move;
+
+Move* top = NULL;
+
+void push_move(int move_number, char description[]) {
+    Move* new_move = (Move*)malloc(sizeof(Move));
+    new_move->move_number = move_number;
+    strcpy(new_move->description, description);
+    new_move->next = top;
+    top = new_move;
+}
+
+void pop_move() {
+    if (top == NULL) {
+        printf("No moves to undo.\n");
+        return;
+    }
+    printf("Move #%d: %s\n", top->move_number, top->description);
+    Move* temp = top;
+    top = top->next;
+    free(temp);
+}
+
+void display_moves() {
+    if (top == NULL) {
+        printf("No moves made yet.\n");
+    } else {
+        Move* current = top;
+        while (current != NULL) {
+            printf("Move #%d: %s\n", current->move_number, current->description);
+            current = current->next;
+        }
+    }
+}
+
+int main() {
+    push_move(1, "Player moved to position (1,1)");
+    push_move(2, "Player moved to position (1,2)");
+    push_move(3, "Player moved to position (2,2)");
+    display_moves();
+    pop_move();
+    display_moves();
+    return 0;
+}
+
+5.#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+    char data;
+    struct Node* next;
+} Node;
+
+Node* top = NULL;
+
+void push(char c) {
+    Node* new_node = (Node*)malloc(sizeof(Node));
+    new_node->data = c;
+    new_node->next = top;
+    top = new_node;
+}
+
+char pop() {
+    if (top == NULL) {
+        return -1;  // Stack is empty
+    }
+    char c = top->data;
+    Node* temp = top;
+    top = top->next;
+    free(temp);
+    return c;
+}
+
+int is_balanced(char* expression) {
+    for (int i = 0; expression[i] != '\0'; i++) {
+        char current = expression[i];
+
+        if (current == '(' || current == '[' || current == '{') {
+            push(current);
+        } else if (current == ')' || current == ']' || current == '}') {
+            char top_char = pop();
+            if ((current == ')' && top_char != '(') ||
+                (current == ']' && top_char != '[') ||
+                (current == '}' && top_char != '{')) {
+                return 0;  // Not balanced
+            }
+        }
+    }
+
+    return top == NULL;  // Stack should be empty if balanced
+}
+
+int main() {
+    char expression[] = "{[()]}";
+    if (is_balanced(expression)) {
+        printf("The expression is balanced.\n");
+    } else {
+        printf("The expression is not balanced.\n");
+    }
+    return 0;
+}
